@@ -1,166 +1,407 @@
 ---
 title: "Lab: List Processing"
-author: "Your Name Here"
+author: "Jo Charbonneau"
 format: html
 number-sections: true
 number-depth: 2
+editor: 
+  markdown: 
+    wrap: sentence
 ---
 
 ::: callout
-You can see the purpose of this assignment as well as the skills and knowledge you should be using and acquiring, in the [Transparency in Learning and Teaching (TILT)](tilt.qmd) document in this repository. The TILT document also contains a checklist for self-reflection that will provide some guidance on how the assignment will be graded. 
+You can see the purpose of this assignment as well as the skills and knowledge you should be using and acquiring, in the [Transparency in Learning and Teaching (TILT)](tilt.qmd) document in this repository.
+The TILT document also contains a checklist for self-reflection that will provide some guidance on how the assignment will be graded.
 :::
 
 # Data Source
 
-JSON data files for this assignment were obtained from the TVMaze API for three different  Doctor Who series as well as two different spin-offs. 
+JSON data files for this assignment were obtained from the TVMaze API for three different Doctor Who series as well as two different spin-offs.
 
-- Dr. Who [2023-2025](https://www.tvmaze.com/shows/72724/doctor-who)
-- Dr. Who [2005-2022](https://www.tvmaze.com/shows/210/doctor-who)
-- Dr. Who [1963-1996](https://www.tvmaze.com/shows/766/doctor-who)
-- [The Sarah Jane Adventures (2007-2020)](https://www.tvmaze.com/shows/970/the-sarah-jane-adventures)
-- [Torchwood (2006-2011)](https://www.tvmaze.com/shows/659/torchwood)
-- [Torchwood: Web of Lies (2011)](https://www.tvmaze.com/shows/26694/torchwood-web-of-lies)
+-   Dr. Who [2023-2025](https://www.tvmaze.com/shows/72724/doctor-who)
+-   Dr. Who [2005-2022](https://www.tvmaze.com/shows/210/doctor-who)
+-   Dr. Who [1963-1996](https://www.tvmaze.com/shows/766/doctor-who)
+-   [The Sarah Jane Adventures (2007-2020)](https://www.tvmaze.com/shows/970/the-sarah-jane-adventures)
+-   [Torchwood (2006-2011)](https://www.tvmaze.com/shows/659/torchwood)
+-   [Torchwood: Web of Lies (2011)](https://www.tvmaze.com/shows/26694/torchwood-web-of-lies)
 
 # Warming Up
 
-For this portion of the assignment, only work with the canonical Dr. Who files (drwho2023.json, drwho2005.json, drwho1963.json). 
+For this portion of the assignment, only work with the canonical Dr. Who files (drwho2023.json, drwho2005.json, drwho1963.json).
 
 ## Parse the file
 
-Add a code chunk that will read each of the JSON files in. 
-Store the data in a `drwhoYYYY` object, where `YYYY` is the first year the series  began to air. 
+Add a code chunk that will read each of the JSON files in.
+Store the data in a `drwhoYYYY` object, where `YYYY` is the first year the series began to air.
 How are the data objects stored?
 
----
+```{r}
+library(jsonlite)
+library(dplyr)
+
+drwho2023 <- fromJSON("https://api.tvmaze.com/shows/72724/episodes", flatten = T)
+drwho2023
+drwho2005 <- fromJSON("https://api.tvmaze.com/shows/210/episodes", flatten = TRUE)
+drwho1963 <- fromJSON("https://api.tvmaze.com/shows/766/episodes", flatten = TRUE)
+
+head(drwho2023[, c("id", "name", "season", "number", "airdate", "airtime")])
+head(drwho2005[, c("id", "name", "season", "number", "airdate", "airtime")])
+head(drwho1963[, c("id", "name", "season", "number", "airdate", "airtime")])
+```
+
+------------------------------------------------------------------------
 
 ## Examining List Data Structures
 
-Create a nested markdown list showing what variables are nested at each level of the JSON file. Include an 'episode' object that is a stand-in for a generic episode (e.g. don't create a list with all 700+ episodes in it, just show what a single episode has). Make sure you use proper markdown formatting to ensure that the lists are rendered properly when you compile your document.
+Create a nested markdown list showing what variables are nested at each level of the JSON file.
+Include an 'episode' object that is a stand-in for a generic episode (e.g. don't create a list with all 700+ episodes in it, just show what a single episode has).
+Make sure you use proper markdown formatting to ensure that the lists are rendered properly when you compile your document.
 
-Hint: The `prettify()` function in the R package `jsonlite` will spit out a better-formatted version of a JSON file. 
+Hint: The `prettify()` function in the R package `jsonlite` will spit out a better-formatted version of a JSON file.
 
-----
+------------------------------------------------------------------------
 
-List here
+```{r}
+json_txt <- toJSON(drwho2023[1,], pretty = TRUE)
 
-----
+cat(json_txt)
 
-Is there any information stored in the list structure that you feel is redundant? If so, why?
+names(drwho2023)
 
+```
 
+------------------------------------------------------------------------
+
+Is there any information stored in the list structure that you feel is redundant?
+If so, why?
+The fields \_links.show\>href and \_links.show.name seem pretty redundant, as the URL wouldn't change between episodes.
+image.medium and image.original could be pretty redundant.
+I would say we only really need the original image.
 
 ## Develop A Strategy
 
-Consider what information you would need to examine the structure of Dr. Who episodes over time (show runtime, season length, specials) as well as the ratings, combining information across all three data files. 
+Consider what information you would need to examine the structure of Dr. Who episodes over time (show runtime, season length, specials) as well as the ratings, combining information across all three data files.
 
-Sketch one or more rectangular data tables that look like your expected output. Remember that if you link to an image, you must link to something with a picture extension (`.png`, `.jpg`), and if you reference a file it should be using a local path and you must also add the picture to your git repository. 
+Sketch one or more rectangular data tables that look like your expected output.
+Remember that if you link to an image, you must link to something with a picture extension (`.png`, `.jpg`), and if you reference a file it should be using a local path and you must also add the picture to your git repository.
 
----
+------------------------------------------------------------------------
 
-Sketch goes here
+Episode level table
 
----
+![](images/Screenshot 2025-09-21 213441.png)
 
-What operations will you need to perform to get the data into a form matching your sketch? Make an ordered list of steps you need to take.
+Season-level table
 
----
+![](images/Screenshot 2025-09-21 213449.png)
 
-1. ... fill me in
-2. ...
-3. ...
+(These are random numbers for the sake of making a table but I am remarkably biased towards the David Tennant/Matt Smith era so that has to be higher rating)
+
+------------------------------------------------------------------------
+
+What operations will you need to perform to get the data into a form matching your sketch?
+Make an ordered list of steps you need to take.
+
+------------------------------------------------------------------------
+
+1. Inspect the structure and clean the redundant fields 
+2.  Add a series column 
+3.  Combine all three datasets into one (bind_rows())
+4. Create an episode-level table 
+5. Create a season-level summary table (use group by and compute metrics)
 
 ## Implement Your Strategy
 
-Add a code chunk that will convert the JSON files into the table(s) you sketched above. 
+Add a code chunk that will convert the JSON files into the table(s) you sketched above.
 Make sure that the resulting tables have the correct variable types (e.g., dates should not be stored as character variables).
 
 Print out the first 5 rows of each table that you create (but no more)!
 
+```{r}
+drwho2023_clean <- drwho2023 %>%
+    select(name, season, number, airdate, runtime, rating.average, type, image.original, airtime) %>%
+    mutate(
+        series = "2023-2025",
+        airdate = as.Date(airdate),
+        runtime = as.numeric(runtime),
+        rating.average = as.numeric(rating.average),
+        airtime = ifelse(airtime == "", NA, airtime)
+    )
+
+drwho2005_clean <- drwho2005 %>%
+    select(name, season, number, airdate, runtime, rating.average, type, image.original, airtime) %>%
+    mutate(
+        series = "2005-2022",
+        airdate = as.Date(airdate),
+        runtime = as.numeric(runtime),
+        rating.average = as.numeric(rating.average),
+        airtime = ifelse(airtime == "", NA, airtime)
+    )
+
+drwho1963_clean <- drwho1963 %>%
+  select(name, season, number, airdate, runtime, rating.average,
+         type, image.original, airtime) %>%
+  mutate(
+    series = "1963-1996",
+    airdate = as.Date(airdate),
+    runtime = as.numeric(runtime),
+    rating.average = as.numeric(rating.average),
+    airtime = ifelse(airtime == "", NA, airtime)
+  )
+
+#Combine all series into one episode-level table 
+all_episodes <- bind_rows(drwho2023_clean, drwho2005_clean, drwho1963_clean)
+
+head(all_episodes, 5)
+
+#Create season-level summary table 
+season_summary <- all_episodes %>%
+    group_by(series, season) %>%
+    summarize(
+        num_episodes = n(),
+        avg_runtime = mean(runtime, na.rm = T),
+        avg_rating = mean(rating.average, na.rm = TRUE),
+        .groups = "drop"
+    )
+
+head(season_summary, 5)
+
+```
+
 ## Examining Episode Air Dates
 
-Visually represent the length of time between air dates of adjacent episodes within the same season, across all seasons of Dr. Who. You may need to create a factor to indicate which Dr. Who series is indicated, as there will be a Season 1 for each of the series. 
+Visually represent the length of time between air dates of adjacent episodes within the same season, across all seasons of Dr. Who.
+You may need to create a factor to indicate which Dr. Who series is indicated, as there will be a Season 1 for each of the series.
 Your plot must have appropriate labels and a title.
 
----
+------------------------------------------------------------------------
 
-code chunk here
+```{r}
+library(lubridate)
+library(ggplot2)
 
----
+all_episodes$series <- factor(all_episodes$series, levels = c("1963-1996", "2005-2022", "2023-2025"))
 
-In 2-3 sentences, explain what conclusions you might draw from the data. What patterns do you notice? Are there data quality issues?
+diff_airdate <- all_episodes %>%
+    arrange(series, season, number) %>%
+    group_by(series, season) %>%
+    mutate(
+        prev_airdate = lag(airdate), 
+        days_between = as.numeric(airdate - prev_airdate)
+    ) %>%
+    filter(!is.na(days_between)) %>%
+    ungroup()
+
+days_betw_plot <- ggplot(diff_airdate, aes(x = airdate, y = days_between, color = series, shape = type)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_line(aes(group = series), alpha = 0.3) +
+  labs(
+    title = "Time Between Consecutive Doctor Who Episodes",
+    x = "Airdate",
+    y = "Days Between Episodes",
+    color = "Series",
+    shape = "Episode Type"
+  ) +
+  theme_minimal(base_size = 12)
+days_betw_plot
+
+```
+
+------------------------------------------------------------------------
+
+In 2-3 sentences, explain what conclusions you might draw from the data.
+What patterns do you notice?
+Are there data quality issues?
+
+From the plot, we can see that most seasons are roughly a week apart, give or take, with some outliers really appear between 2005 and 2022. Some data quality issues would be with the plot, as it may be difficult to read, but especially with some episode dates that potentially hold unusual date formats that could affect summary statistics. 
 
 # Timey-Wimey Series and Episodes
 
 ## Setting Up
 
-In this section of the assignment, you will work with all of the provided JSON files. 
-Use a functional programming approach to read in all of the files and bind them together. 
+In this section of the assignment, you will work with all of the provided JSON files.
+Use a functional programming approach to read in all of the files and bind them together.
 
-----
+------------------------------------------------------------------------
 
-functional code goes here
+```{r}
+library(purrr)
 
-----
+sja <- fromJSON("https://api.tvmaze.com/shows/970/episodes", flatten = TRUE)
+torchwood <- fromJSON("https://api.tvmaze.com/shows/659/episodes", flatten = TRUE)
+torchwood_web <- fromJSON("https://api.tvmaze.com/shows/26694/episodes", flatten = TRUE)
 
-Then, use the processing code you wrote for the previous section to perform appropriate data cleaning steps. 
-At the end of the chunk, your data should be in a reasonably tidy, rectangular form with appropriate data types. 
-Call this rectangular table `whoverse`. 
+all_shows <- list(
+    drwho1963 =drwho1963,
+    drwho2005 = drwho2005,
+    drwho2023 = drwho2023,
+    sja = sja,
+    torchwood = torchwood,
+    torchwood_web = torchwood_web
+)
 
-----
+series_labels <- c(
+  "1963-1996",
+  "2005-2022",
+  "2023-2025",
+  "The Sarah Jane Adventures",
+  "Torchwood",
+  "Torchwood: Web of Lies"
+)
 
-Cleaning code goes here
+whoverse1 <- imap_dfr(all_shows, ~{
+  df <- .x
+  df$series <- series_labels[which(names(all_shows) == .y)]
+  df
+})
+```
 
-----
+------------------------------------------------------------------------
 
+Then, use the processing code you wrote for the previous section to perform appropriate data cleaning steps.
+At the end of the chunk, your data should be in a reasonably tidy, rectangular form with appropriate data types.
+Call this rectangular table `whoverse`.
+
+------------------------------------------------------------------------
+
+```{r}
+whoverse <- whoverse1 %>%
+  select(series, name, season, number, airdate, runtime, rating.average,
+         type, image.original, airtime, `_links.show.href`) %>%
+  mutate(
+    airdate = as.Date(airdate),
+    runtime = as.numeric(runtime),
+    rating.average = as.numeric(rating.average),
+    season = as.integer(season),
+    number = as.integer(number),
+    type = as.factor(type),
+    series = as.factor(series),
+    airtime = ifelse(airtime == "", NA, airtime)
+  )
+
+head(whoverse, 5)
+
+```
+------------------------------------------------------------------------
 
 ## Air Time
 
 Investigate the air time of the episodes relative to the air date, series, and season.
-It may help to know that the [watershed](https://en.wikipedia.org/wiki/Watershed_(broadcasting)) period in the UK is 9:00pm - 5:30am. 
+It may help to know that the [watershed](https://en.wikipedia.org/wiki/Watershed_(broadcasting)) period in the UK is 9:00pm - 5:30am.
 Content that is unsuitable for minors may only be shown during this window.
-What conclusions do you draw about the target audience for each show? 
+What conclusions do you draw about the target audience for each show?
 
 How can you explain any shows in the Dr. Who universe which do not have airtimes provided?
 
+```{r}
+whoverse_clean <- whoverse %>%
+    mutate(airtime = hms::as_hms(ifelse(is.na(airtime), "00:00:00", paste0(airtime, ":00"))))
+
+whoverse_clean %>%
+    group_by(series) %>%
+    summarize(
+        median_airtime = median(hour(airtime) + minute(airtime)/ 60, na.rm = TRUE)
+    )
+
+```
+As we are seeing, Torchwood: Web of Lies has an median run time of 0 minutes. This could be a direct result from TV maze defaulting runtime to 0 instead of NA, and that no runtime is actually recorded, and this could apply to all of them. There is also the possibility that the timing could be in a different format. 
+
+
 ## Another Layer of JSON
 
-Use the show URL (`_links` > `show` > `href`) to read in the JSON file for each show. 
+Use the show URL (`_links` \> `show` \> `href`) to read in the JSON file for each show.
 As with scraping, it is important to be polite and not make unnecessary server calls, so pre-process the data to ensure that you only make one server call for each show.
-You should use a functional programming approach when reading in these files. 
+You should use a functional programming approach when reading in these files.
 
-----
+------------------------------------------------------------------------
 
 Read in JSON files from URLs here
 
-----
+------------------------------------------------------------------------
 
-Process the JSON files using a functional approach and construct an appropriate table for the combined data you've acquired during this step (no need to join the data with the full `whoverse` episode-level data). 
+Process the JSON files using a functional approach and construct an appropriate table for the combined data you've acquired during this step (no need to join the data with the full `whoverse` episode-level data).
 
-----
+------------------------------------------------------------------------
 
-Process JSON files to make a table here
+```{r}
+show_urls <- whoverse %>%
+  pull(`_links.show.href`) %>%
+  unique()
+shows_list <- map(show_urls, ~ fromJSON(.x, flatten = TRUE))
 
-----
+shows_tbl <- shows_list %>%
+    map_df(~tibble(
+        id = .x$id, 
+        name = .x$name,
+        type = .x$type,
+        language = .x$language, 
+        genres = paste(.x$genres, collapse = ", "),
+        status = .x$status,
+        runtime = .x$runtime, 
+        premiered = as.Date(.x$premiered), 
+        ended = as.Date(.x$ended), 
+        officialSite = .x$officialSite, 
+        network_name = if(!is.null(.x$network$name)) as.character(.x$network$name) else NA_character_,
+    network_country = if(!is.null(.x$network$country$name)) as.character(.x$network$country$name) else NA_character_
+    ))
 
-What keys would you use to join this data with the `whoverse` episode level data? Explain.
+shows_tbl
+```
 
-> Explanation
+------------------------------------------------------------------------
 
+What keys would you use to join this data with the `whoverse` episode level data?
+Explain.
+
+> I would probably choose to use the id as the key to join the data as I can extract the numeric ID from the _links.show.href URL and match it to the id column in shows_tbl so each episode can get the show information. 
 
 ## Explore!
 
 Use the data you've assembled to answer a question you find interesting about this data.
-Any graphics you make should have appropriate titles and axis labels. 
-Tables should be reasonably concise (e.g. don't show all 900 episodes in a table), generated in a reproducible fashion, and formatted with markdown. 
-Any results (graphics, tables, models) should be explained with at least 2-3 sentences. 
+Any graphics you make should have appropriate titles and axis labels.
+Tables should be reasonably concise (e.g. don't show all 900 episodes in a table), generated in a reproducible fashion, and formatted with markdown.
+Any results (graphics, tables, models) should be explained with at least 2-3 sentences.
 
-If you're stuck, consider examining the frequency of words in the episode descriptions across different series or seasons. Or, look at the episode guest cast by appending `/guestcast/` to the episode URL and see whether there are common guests across different seasons. 
+If you're stuck, consider examining the frequency of words in the episode descriptions across different series or seasons.
+Or, look at the episode guest cast by appending `/guestcast/` to the episode URL and see whether there are common guests across different seasons.
 
-----
+------------------------------------------------------------------------
 
-Question goes here
+How do episode runtimes compare between the different eras of Doctor Who (not including special episodes/series)? Are there noticeable changes in average runtime over the years?
 
-----
+------------------------------------------------------------------------
 
-Code goes here -- once you output a result, you should explain it using markdown text, and then start a new code chunk to continue your exploration. 
+```{r}
+library(tidyr)
 
+dr_who_all <- bind_rows(drwho1963_clean, drwho2005_clean, drwho2023_clean)
+
+runtime <- dr_who_all %>%
+    group_by(series) %>%
+    summarise(
+        count = n(),
+        median_runtime = median(runtime, na.rm = TRUE),
+        mean_runtime = mean(runtime, na.rm = T),
+        min_runtime = min(runtime, na.rm = T),
+        max_runtime = max(runtime, na.rm = T)
+    )
+
+runtime_long <- runtime %>%
+    pivot_longer(
+        cols = c(min_runtime, max_runtime, mean_runtime, median_runtime),
+        names_to = "statistic",
+        values_to = "runtime_value"
+    )
+
+ggplot(runtime_long, aes(x = series, y = runtime_value, fill = series)) +
+    geom_col() +
+    facet_wrap(~statistic, scales = "free_y") +
+    labs(
+        title = "Doctor Who Episode Runtime by Statistic",
+        x = "Series",
+        y = "Runtime (minutes)"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none")
+
+```
